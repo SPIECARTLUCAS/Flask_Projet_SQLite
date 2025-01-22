@@ -19,32 +19,6 @@ def hello_world():
 def page_bibliotheque():
     return render_template('bibliotheque.html')
 
-@app.route('/rechercher_livres', methods=['GET'])
-def rechercher_livres():
-    query = request.args.get('query', '')
-    livres = Livre.query.filter(
-        Livre.titre.ilike(f'%{query}%') | Livre.auteur.ilike(f'%{query}%')
-    ).all()
-    resultats = [
-        {'id': livre.id, 'titre': livre.titre, 'auteur': livre.auteur, 'genre': livre.genre, 'disponible': livre.disponible}
-        for livre in livres
-    ]
-    return jsonify(resultats)
-
-
-@app.route('/ajouter_livre', methods=['POST'])
-def ajouter_livre():
-    data = request.json
-    nouveau_livre = Livre(
-        titre=data['titre'],
-        auteur=data['auteur'],
-        genre=data.get('genre', 'Inconnu'),
-        disponible=True
-    )
-    db.session.add(nouveau_livre)
-    db.session.commit()
-    return jsonify({'message': 'Livre ajouté avec succès !'}), 201
-
 
 @app.route('/lecture')
 def lecture():
@@ -130,3 +104,71 @@ def enregistrer_client():
                                                                                                                                        
 if __name__ == "__main__":
   app.run(debug=True)
+
+DATABASE = 'bibliotheque.db'
+
+def get_db():
+    """Obtenir une connexion à la base de données."""
+    if 'db' not in g:
+        g.db = sqlite3.connect(DATABASE)
+        g.db.row_factory = sqlite3.Row
+    return g.db
+
+def close_db(e=None):
+    """Fermer la connexion à la base de données."""
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
+
+def init_db():
+    """Initialiser la base de données avec les tables nécessaires."""
+    with sqlite3.connect(DATABASE) as conn:
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS Livre (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                titre TEXT NOT NULL,
+                auteur TEXT NOT NULL,
+                genre TEXT,
+                disponible INTEGER DEFAULT 1
+            )
+        ''')
+        conn.commit()
+
+def create_app():
+    """Créer et configurer l'application Flask."""
+    app = Flask(__name__)
+
+    # Initialiser la base de données
+    with app.app_context():
+        init_db()
+
+    # Route principale : gestion de la bibliothèque
+    @app.route('/bibliotheque', methods=['GET', 'POST'])
+    def bibliotheque():
+        db = get_db()
+
+        # Gérer l'ajout de livres (POST)
+        if request.method == 'POST' and 'ajouter_livre' in request.form:
+            titre = request.form['titre']
+            auteur = request.form['auteur']
+            genre = request.form['genre']
+            db.execute(
+                "INSERT INTO Livre (titre, auteur, genre) VALUES (?, ?, ?)",
+                (titre, auteur, genre)
+            )
+            db.commit()
+            return redirect(url_for('bibliotheque'))
+
+        # Gérer la recherche de livres (GET ou POST)
+        query = request.form.get('query', '') if request.method == 'POST' else request.args.get('query', '')
+        livres = db.execute(
+            "SELECT * FROM Livre WHERE titre LIKE ? OR auteur LIKE ?",
+            (f'%{query}%', f'%{query}%')
+        ).fetchall()
+
+        return render_template('bibliotheque.html', livres=livres, query=query)
+
+    # Enregistrer les gestionnaires de cycle de vie de la base de données
+    app.teardown_appcontext(close_db)
+
+    return app
