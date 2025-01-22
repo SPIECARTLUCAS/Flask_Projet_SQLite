@@ -12,7 +12,7 @@
             const auteur = document.getElementById('auteur').value;
             const genre = document.getElementById('genre').value;
 
-            const response = await fetch('/api/ajouter_livre', {
+            const response = await fetch('/ajouter_livre', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ titre, auteur, genre })
@@ -28,7 +28,7 @@
             event.preventDefault();
             const query = document.getElementById('query').value;
 
-            const response = await fetch(`/api/rechercher_livres?query=${encodeURIComponent(query)}`);
+            const response = await fetch(`/rechercher_livres?query=${encodeURIComponent(query)}`);
             const resultats = await response.json();
 
             const resultDiv = document.getElementById('resultats');
