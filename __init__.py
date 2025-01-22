@@ -19,7 +19,7 @@ def hello_world():
 def page_bibliotheque():
     return render_template('bibliotheque.html')
 
-@app.route('/api/rechercher_livres', methods=['GET'])
+@app.route('/rechercher_livres', methods=['GET'])
 def rechercher_livres():
     query = request.args.get('query', '')
     livres = Livre.query.filter(
@@ -32,7 +32,7 @@ def rechercher_livres():
     return jsonify(resultats)
 
 
-@app.route('/api/ajouter_livre', methods=['POST'])
+@app.route('/ajouter_livre', methods=['POST'])
 def ajouter_livre():
     data = request.json
     nouveau_livre = Livre(
