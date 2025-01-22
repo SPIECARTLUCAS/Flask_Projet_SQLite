@@ -62,9 +62,6 @@ def ReadBDD():
 def formulaire_client():
     return render_template('formulaire.html')  # afficher le formulaire*
 
-@app.route('/bibliotheque', methods=['GET'])
-def formulaire_client():
-    return render_template('bibliotheque.html')
 
 @app.route('/fiche_nom/', methods=['GET', 'POST'])
 def ReadBDD_2():
