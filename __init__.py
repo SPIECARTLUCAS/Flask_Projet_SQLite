@@ -16,8 +16,7 @@ def est_authentifie():
 def hello_world():
     return render_template('hello.html') #comm2
 
-@app.route('/bibliotheque')
-def hello_world():
+def page_bibliotheque():
     return render_template('bibliotheque.html')
 
 @app.route('/lecture')
