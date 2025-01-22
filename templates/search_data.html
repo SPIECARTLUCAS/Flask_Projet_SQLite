@@ -1,47 +1,47 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recherche par Nom</title>
+    <title>Recherche de Clients</title>
 </head>
 <body>
-    <h1>Rechercher un client par son nom</h1>
+    <h1>Recherche de Clients</h1>
 
-    <form method="POST" action="/fiche_nom/">
-        <label for="nom">Nom :</label>
-        <input type="text" id="nom" name="nom" required>
+    <!-- Formulaire de recherche -->
+    <form method="GET" action="/fiche_nom/">
+        <label for="nom">Nom du client :</label>
+        <input type="text" id="nom" name="nom" value="{{ nom }}">
         <button type="submit">Rechercher</button>
     </form>
 
-    {% if message %}
-        <p>{{ message }}</p>
-    {% endif %}
-
-    {% if results %}
-        <h2>Résultats :</h2>
+    <h2>Résultats :</h2>
+    {% if data %}
         <table border="1">
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Créé</th>
                     <th>Nom</th>
                     <th>Prénom</th>
                     <th>Adresse</th>
+                    <th>Téléphone</th>
+                    
                 </tr>
             </thead>
             <tbody>
-                {% for client in results %}
+                {% for row in data %}
                     <tr>
-                        <td>{{ client[0] }}</td>
-                        <td>{{ client[1] }}</td>
-                        <td>{{ client[2] }}</td>
-                        <td>{{ client[3] }}</td>
-                        <td>{{ client[4] }}</td>
+                        <td>{{ row[0] }}</td>
+                        <td>{{ row[2] }}</td>
+                        <td>{{ row[3] }}</td>
+                        <td>{{ row[5] }}</td>
+                        <td>{{ row[1] }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
+    {% else %}
+        <p>Aucun client trouvé.</p>
     {% endif %}
 </body>
 </html>
