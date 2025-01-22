@@ -1,21 +1,30 @@
-from flask import Flask, render_template, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
+import sqlite3
 
-app = Flask(__name__)
+# Connexion à la base de données SQLite
+connection = sqlite3.connect('bibliotheque.db')
 
-# Configuration de la base de données
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bibliotheque.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
+# Création des tables à partir du fichier schema.sql
+with open('schema.sql') as f:
+    connection.executescript(f.read())
 
-# Modèle pour les livres
-class Livre(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    titre = db.Column(db.String(100), nullable=False)
-    auteur = db.Column(db.String(100), nullable=False)
-    genre = db.Column(db.String(50), nullable=True)
-    disponible = db.Column(db.Boolean, default=True)
+# Initialisation des données de la table Livre
+cur = connection.cursor()
 
-# Initialisation de la base de données
-with app.app_context():
-    db.create_all()
+cur.execute("INSERT INTO Livre (titre, auteur, genre) VALUES (?, ?, ?)",
+            ('Le Petit Prince', 'Antoine de Saint-Exupéry', 'Fiction'))
+cur.execute("INSERT INTO Livre (titre, auteur, genre) VALUES (?, ?, ?)",
+            ('1984', 'George Orwell', 'Dystopie'))
+cur.execute("INSERT INTO Livre (titre, auteur, genre) VALUES (?, ?, ?)",
+            ('Les Misérables', 'Victor Hugo', 'Classique'))
+cur.execute("INSERT INTO Livre (titre, auteur, genre) VALUES (?, ?, ?)",
+            ('L\'Étranger', 'Albert Camus', 'Philosophie'))
+cur.execute("INSERT INTO Livre (titre, auteur, genre) VALUES (?, ?, ?)",
+            ('Harry Potter à l\'école des sorciers', 'J.K. Rowling', 'Fantasy'))
+cur.execute("INSERT INTO Livre (titre, auteur, genre) VALUES (?, ?, ?)",
+            ('Le Seigneur des Anneaux', 'J.R.R. Tolkien', 'Fantasy'))
+
+# Sauvegarder les changements et fermer la connexion
+connection.commit()
+connection.close()
+
+print("Base de données initialisée avec succès.")
