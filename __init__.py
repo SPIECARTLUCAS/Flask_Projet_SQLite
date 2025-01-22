@@ -19,6 +19,19 @@ def hello_world():
 def page_bibliotheque():
     return render_template('bibliotheque.html')
 
+@app.route('/api/rechercher_livres', methods=['GET'])
+def rechercher_livres():
+    query = request.args.get('query', '')
+    livres = Livre.query.filter(
+        Livre.titre.ilike(f'%{query}%') | Livre.auteur.ilike(f'%{query}%')
+    ).all()
+    resultats = [
+        {'id': livre.id, 'titre': livre.titre, 'auteur': livre.auteur, 'genre': livre.genre, 'disponible': livre.disponible}
+        for livre in livres
+    ]
+    return jsonify(resultats)
+
+
 @app.route('/lecture')
 def lecture():
     if not est_authentifie():
