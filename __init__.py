@@ -14,7 +14,7 @@ def est_authentifie():
 
 @app.route('/')
 def hello_world():
-    return render_template('hello.html')
+    return render_template('hello.html') #comm2
 
 @app.route('/lecture')
 def lecture():
@@ -60,7 +60,27 @@ def ReadBDD():
 
 @app.route('/enregistrer_client', methods=['GET'])
 def formulaire_client():
-    return render_template('formulaire.html')  # afficher le formulaire
+    return render_template('formulaire.html')  # afficher le formulaire*
+
+@app.route('/fiche_nom/', methods=['GET', 'POST'])
+def ReadBDD_2():
+    nom = request.args.get('nom', '')  # Récupérer le nom passé en paramètre GET ou POST
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+
+    if nom:
+        # Recherche spécifique par nom
+        cursor.execute('SELECT * FROM clients WHERE nom = ?', (nom,))
+    else:
+        # Si aucun nom fourni, afficher tous les clients
+        cursor.execute('SELECT * FROM clients;')
+
+    data = cursor.fetchall()
+    conn.close()
+
+    # Renvoyer les données au template HTML
+    return render_template('search_data.html', data=data, nom=nom)
+
 
 @app.route('/enregistrer_client', methods=['POST'])
 def enregistrer_client():
