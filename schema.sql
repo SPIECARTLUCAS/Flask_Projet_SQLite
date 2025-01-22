@@ -6,3 +6,11 @@ CREATE TABLE clients (
     prenom TEXT NOT NULL,
     adresse TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS Livre (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    titre TEXT NOT NULL,
+    auteur TEXT NOT NULL,
+    genre TEXT,
+    disponible INTEGER DEFAULT 1
+);
+
