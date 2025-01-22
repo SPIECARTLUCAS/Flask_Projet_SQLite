@@ -32,6 +32,20 @@ def rechercher_livres():
     return jsonify(resultats)
 
 
+@app.route('/api/ajouter_livre', methods=['POST'])
+def ajouter_livre():
+    data = request.json
+    nouveau_livre = Livre(
+        titre=data['titre'],
+        auteur=data['auteur'],
+        genre=data.get('genre', 'Inconnu'),
+        disponible=True
+    )
+    db.session.add(nouveau_livre)
+    db.session.commit()
+    return jsonify({'message': 'Livre ajouté avec succès !'}), 201
+
+
 @app.route('/lecture')
 def lecture():
     if not est_authentifie():
