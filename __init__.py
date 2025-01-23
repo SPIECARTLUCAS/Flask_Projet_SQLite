@@ -17,8 +17,9 @@ def page_bibliotheque():
     return render_template('bibliotheque.html')
     
 @app.route('/')
-def hello_world():
-    return render_template('hello.html') #comm2
+def index():
+    livres = Livre.query.all()
+    return render_template('index.html', livres=livres)
 
 
 
@@ -107,4 +108,77 @@ def enregistrer_client():
 if __name__ == "__main__":
   app.run(debug=True)
 
+@app.route('/inscription', methods=['GET', 'POST'])
+def inscription():
+    if request.method == 'POST':
+        nom_utilisateur = request.form['nom_utilisateur']
+        mot_de_passe = request.form['mot_de_passe']
+        
+        if Utilisateur.query.filter_by(nom_utilisateur=nom_utilisateur).first():
+            flash('Nom d\'utilisateur déjà pris.', 'danger')
+            return redirect(url_for('inscription'))
 
+        hash_mdp = generate_password_hash(mot_de_passe)
+        nouvel_utilisateur = Utilisateur(nom_utilisateur=nom_utilisateur, mot_de_passe=hash_mdp)
+        db.session.add(nouvel_utilisateur)
+        db.session.commit()
+        flash('Inscription réussie ! Connectez-vous.', 'success')
+        return redirect(url_for('connexion'))
+
+    return render_template('inscription.html')
+
+@app.route('/connexion', methods=['GET', 'POST'])
+def connexion():
+    if request.method == 'POST':
+        nom_utilisateur = request.form['nom_utilisateur']
+        mot_de_passe = request.form['mot_de_passe']
+
+        utilisateur = Utilisateur.query.filter_by(nom_utilisateur=nom_utilisateur).first()
+        if utilisateur and check_password_hash(utilisateur.mot_de_passe, mot_de_passe):
+            session['utilisateur_id'] = utilisateur.id
+            session['nom_utilisateur'] = utilisateur.nom_utilisateur
+            flash('Connexion réussie !', 'success')
+            return redirect(url_for('index'))
+        else:
+            flash('Nom d\'utilisateur ou mot de passe incorrect.', 'danger')
+
+    return render_template('connexion.html')
+
+@app.route('/deconnexion')
+def deconnexion():
+    session.pop('utilisateur_id', None)
+    session.pop('nom_utilisateur', None)
+    flash('Vous êtes déconnecté.', 'info')
+    return redirect(url_for('index'))
+
+@app.route('/emprunter/<int:livre_id>')
+def emprunter_livre(livre_id):
+    if 'utilisateur_id' not in session:
+        flash('Veuillez vous connecter pour emprunter un livre.', 'warning')
+        return redirect(url_for('connexion'))
+
+    livre = Livre.query.get_or_404(livre_id)
+    if not livre.disponible:
+        flash('Ce livre est déjà emprunté.', 'danger')
+    else:
+        livre.disponible = False
+        db.session.commit()
+        flash(f'Vous avez emprunté "{livre.titre}".', 'success')
+
+    return redirect(url_for('index'))
+
+@app.route('/rendre/<int:livre_id>')
+def rendre_livre(livre_id):
+    if 'utilisateur_id' not in session:
+        flash('Veuillez vous connecter pour rendre un livre.', 'warning')
+        return redirect(url_for('connexion'))
+
+    livre = Livre.query.get_or_404(livre_id)
+    if livre.disponible:
+        flash('Ce livre n\'est pas emprunté.', 'danger')
+    else:
+        livre.disponible = True
+        db.session.commit()
+        flash(f'Vous avez rendu "{livre.titre}".', 'success')
+
+    return redirect(url_for('index'))
