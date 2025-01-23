@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block title %}Accueil{% endblock %}
+{% block content %}
+<h1 class="mb-4">Liste des livres</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Titre</th>
+            <th>Auteur</th>
+            <th>Disponibilité</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for livre in livres %}
+        <tr>
+            <td>{{ livre.titre }}</td>
+            <td>{{ livre.auteur }}</td>
+            <td>{{ 'Disponible' if livre.disponible else 'Emprunté' }}</td>
+            <td>
+                {% if livre.disponible %}
+                    <a href="{{ url_for('emprunter_livre', livre_id=livre.id) }}" class="btn btn-success btn-sm">Emprunter</a>
+                {% else %}
+                    <a href="{{ url_for('rendre_livre', livre_id=livre.id) }}" class="btn btn-warning btn-sm">Rendre</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
