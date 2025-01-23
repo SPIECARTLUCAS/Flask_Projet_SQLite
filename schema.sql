@@ -1,48 +1,39 @@
-DROP TABLE IF EXISTS clients;
-CREATE TABLE clients (
+-- Table des utilisateurs
+DROP TABLE IF EXISTS utilisateurs;
+CREATE TABLE utilisateurs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     nom TEXT NOT NULL,
     prenom TEXT NOT NULL,
-    adresse TEXT NOT NULL
+    email TEXT NOT NULL,
+    role TEXT NOT NULL CHECK(role IN ('utilisateur', 'administrateur')) -- Rôle de l'utilisateur
 );
-CREATE TABLE IF NOT EXISTS Livre (
+
+-- Table des livres
+DROP TABLE IF EXISTS livres;
+CREATE TABLE livres (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     titre TEXT NOT NULL,
-    auteur TEXT NOT NULL,
-    genre TEXT,
-    disponible INTEGER DEFAULT 1
-);
--- Table pour les livres
-CREATE TABLE Livres (
-    id_livre INT AUTO_INCREMENT PRIMARY KEY,
-    titre VARCHAR(255) NOT NULL,
-    auteur VARCHAR(255) NOT NULL,
-    annee_publication YEAR,
-    genre VARCHAR(100),
-    isbn VARCHAR(20) UNIQUE,
-    nbre_exemplaires VARCHAR(2) NOT NULL
+    auteur TEXT NOT NULL
 );
 
--- Table pour les utilisateurs
-CREATE TABLE Utilisateurs (
-    id_utilisateur INT AUTO_INCREMENT PRIMARY KEY,
-    nom VARCHAR(100) NOT NULL,
-    prenom VARCHAR(100) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    date_inscription DATE DEFAULT CURRENT_DATE
+-- Table du stock (gestion centralisée du stock des livres)
+DROP TABLE IF EXISTS stock;
+CREATE TABLE stock (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    livre_id INTEGER NOT NULL,
+    quantite INTEGER NOT NULL DEFAULT 0, -- Quantité de livres disponibles
+    date_modification TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Date de modification du stock
+    FOREIGN KEY (livre_id) REFERENCES livres(id)
 );
 
-
--- Table pour les emprunts
-CREATE TABLE Emprunts (
-    id_emprunt INT AUTO_INCREMENT PRIMARY KEY,
-    id_utilisateur INT NOT NULL,
-    id_livre INT NOT NULL,
-    date_emprunt DATE DEFAULT CURRENT_DATE,
-    date_retour_prevue DATE,
-    date_retour_effective DATE,
-    FOREIGN KEY (id_utilisateur) REFERENCES Utilisateurs(id_utilisateur) ON DELETE CASCADE,
-    FOREIGN KEY (id_livre) REFERENCES Livres(id_livre) ON DELETE CASCADE
+-- Table des emprunts
+DROP TABLE IF EXISTS emprunts;
+CREATE TABLE emprunts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    utilisateur_id INTEGER NOT NULL,
+    livre_id INTEGER NOT NULL,
+    date_emprunt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    date_retour_prevue TIMESTAMP NOT NULL, -- Date prévue de retour du livre
+    FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs(id),
+    FOREIGN KEY (livre_id) REFERENCES livres(id)
 );
-
